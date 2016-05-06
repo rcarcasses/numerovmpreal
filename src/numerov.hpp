@@ -7,23 +7,56 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include "mpreal.h"
 
 using namespace std;
+using mpfr::mpreal;
 
 struct Point {
+    mpreal x = 0;
+    mpreal y = 0;
+};
+
+struct Point2 {
     double x = 0;
     double y = 0;
 };
 
+vector<Point2> wrap2(vector<Point> v) {
+    vector<Point2> vWrap;
+    vWrap.resize(v.size());
+    for(int i = 0; i < v.size(); i++){
+        vWrap[i].x = v[i].x.toDouble();
+        vWrap[i].y = v[i].y.toDouble();
+    }
+    
+    return vWrap;
+}
+
+vector<double> wrap(vector<mpreal> v) {
+    vector<double> vWrap;
+    vWrap.resize(v.size());
+    for(int i = 0; i < v.size(); i++){
+        vWrap[i] = v[i].toDouble();
+    }
+    
+    return vWrap;
+}
+
 struct Range {
-	double eMin = 0;
+	mpreal eMin = 0;
+	mpreal eMax = 1;
+};
+
+struct Range2 {
+    double eMin = 0;
 	double eMax = 1;
 };
 
 struct Mode {
-	double energy;
+	mpreal energy;
 	vector<Point> wavefunction;
-	Mode(double e, vector<Point> f){
+	Mode(mpreal e, vector<Point> f){
 		energy = e;
 		wavefunction = f;
 	}
@@ -42,18 +75,30 @@ struct Spectrum {
 		potential.clear();
    	}
        
-    vector<double> getEnergies() {
-        vector<double> energies;
+    vector<mpreal> getEnergies() {
+        vector<mpreal> energies;
         for(int i = 0; i < modes.size(); i++) 
             energies.push_back(modes[i].energy);
         
         return energies;
     }
     
+    vector<double> getEnergies2() {
+        return wrap(getEnergies());
+    }
+    
     vector<vector<Point>> getWavefunctions() {
         vector<vector<Point>> wfs;
         for(int i = 0; i < modes.size(); i++) 
             wfs.push_back(modes[i].wavefunction);
+        
+        return wfs;
+    }
+    
+    vector<vector<Point2>> getWavefunctions2() {
+        vector<vector<Point2>> wfs;
+        for(int i = 0; i < modes.size(); i++) 
+            wfs.push_back(wrap2(modes[i].wavefunction));
         
         return wfs;
     }
@@ -69,41 +114,64 @@ class Numerov {
 		vector<Point> sol;
 		Point minPot;
 		Spectrum spectrum;
-		std::function<double(double)> potFunc;
-		function<double(double)> diffFunc = [this](double E){
+		std::function<mpreal(mpreal)> potFunc;
+		function<mpreal(mpreal)> diffFunc = [this](mpreal E){
 			return diff(E);
 		};
 
-		double bisection(function<double(double)> diffFunc, double min, double max);
+		mpreal bisection(function<mpreal(mpreal)> diffFunc, mpreal min, mpreal max);
 		void buildSol() ;
-		double diff(double E);
+		mpreal diff(mpreal E);
 		void displaySol(vector<Point> sol);
 		void findMinPot();
-		//void plotXY(std::vector<double> x, std::vector<double> y);
+		//void plotXY(std::vector<mpreal> x, std::vector<mpreal> y);
 		void savePotential() ;
 		void scanForZeroRanges(int nZeros) ;
 		void wait_for_key();
-	 	double zbrent(function<double(double)>& func, double x1, double x2, double tol);
+	 	mpreal zbrent(function<mpreal(mpreal)>& func, mpreal x1, mpreal x2, mpreal tol);
 	
 	public:
 		// these values can be overrided later
-		double h     = 0.01;
-		double xMin  = -5;
-		double xMax  = 5;
-		double tol   = 1e-9;
-		double dEmin = 0.1;
-		int nPoints  = 1000;
+		mpreal h     = "0.001";
+		mpreal xMin  = "-15";
+		mpreal xMax  = "15";
+		mpreal tol   = "1e-9";
+		mpreal dEmin = "0.1";
+		int nPoints  = 2000;
 
 		void setPotential(vector<Point>);
+		void setPotential2(vector<Point2>);
 		vector<Point> getPotential();
+		void dumpEnergies();
+		void dumpEnergies2();
+		vector<Point2> getPotential2();
 		void findSpectrum(int nEigen);
 		Spectrum getSpectrum();
 
 };
 
+void Numerov::dumpEnergies (){
+	cout << "ENERGIES:" << endl;
+	vector<mpreal> energies = spectrum.getEnergies();
+	for (auto e: energies) 
+		cout << e << endl;
+	cout << "--------" << endl;
+}
+
+void Numerov::dumpEnergies2 (){
+	cout << "ENERGIES(using double):" << endl;
+	vector<mpreal> energies = spectrum.getEnergies();
+	for (auto e: wrap(energies)) 
+		cout << e << endl;
+	cout << "--------" << endl;
+}
 
 vector<Point> Numerov::getPotential() {
     return potential;
+}
+
+vector<Point2> Numerov::getPotential2() {
+    return wrap2(getPotential());
 }
 
 Spectrum Numerov::getSpectrum() {
@@ -111,20 +179,20 @@ Spectrum Numerov::getSpectrum() {
 }
 
 // Van Wijngaarden–Dekker–Brent Method for finding root, from NR
-#define ITMAX 600
-#define EPS 1e-9
+mpreal EPS = "1e-12";
+#define ITMAX 800
 #define SIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
-double Numerov::zbrent(function<double(double)>& func, double x1, double x2, double tol)
+mpreal Numerov::zbrent(function<mpreal(mpreal)>& func, mpreal x1, mpreal x2, mpreal tol)
 {
 	int iter;
-	double a=x1,b=x2,c=x2,d,e,min1,min2;
-	double fa=func(a),fb=func(b),fc,p,q,r,s,tol1,xm;
+	mpreal a=x1,b=x2,c=x2,d,e,min1,min2;
+	mpreal fa=func(a),fb=func(b),fc,p,q,r,s,tol1,xm;
 	
-	if ((fa > 0.0 && fb > 0.0) || (fa < 0.0 && fb < 0.0))
+	if ((fa > "0.0" && fb > "0.0") || (fa < "0.0" && fb < "0.0"))
 		cout << "[WARN] Root must be bracketed in zbrent"<<endl;
 	fc=fb;
 	for (iter=1;iter<=ITMAX;iter++) {
-		if ((fb > 0.0 && fc > 0.0) || (fb < 0.0 && fc < 0.0)) {
+		if ((fb > "0.0" && fc > "0.0") || (fb < "0.0" && fc < "0.0")) {
 			c  = a;			//Rename a, b, c and adjust bounding interval d.
 			fc = fa;
 			e  = d = b-a;
@@ -138,26 +206,26 @@ double Numerov::zbrent(function<double(double)>& func, double x1, double x2, dou
 			fc = fa;
 		}
 
-		tol1 = 2.0*EPS*fabs(b)+0.5*tol; //Convergence check.
-		xm = 0.5*(c-b);
+		tol1 = "2.0"*EPS*fabs(b)+"0.5"*tol; //Convergence check.
+		xm = "0.5"*(c-b);
 
-		if (fabs(xm) <= tol1 || fb == 0.0) return b;
+		if (fabs(xm) <= tol1 || fb == "0.0") return b;
 		if (fabs(e) >= tol1 && fabs(fa) > fabs(fb)) {
 			s=fb/fa;		//Attempt inverse quadratic interpolation.
 			if (a == c) {
-				p = 2.0*xm*s;
-				q = 1.0-s;
+				p = "2.0"*xm*s;
+				q = "1.0"-s;
 			} else {
 				q = fa/fc;
 				r = fb/fc;
-				p = s*(2.0*xm*q*(q-r)-(b-a)*(r-1.0));
-				q = (q-1.0)*(r-1.0)*(s-1.0);
+				p = s*("2.0"*xm*q*(q-r)-(b-a)*(r-"1.0"));
+				q = (q-"1.0")*(r-"1.0")*(s-"1.0");
 			}
-			if (p > 0.0) q = -q;		//Check whether in bounds.
+			if (p > "0.0") q = -q;		//Check whether in bounds.
 			p=fabs(p);
-			min1=3.0*xm*q-fabs(tol1*q);
+			min1="3.0"*xm*q-fabs(tol1*q);
 			min2=fabs(e*q);
-			if (2.0*p < (min1 < min2 ? min1 : min2)) {
+			if ("2.0"*p < (min1 < min2 ? min1 : min2)) {
 				e = d;
 				//Accept interpolation.
 				d = p/q;
@@ -179,7 +247,7 @@ double Numerov::zbrent(function<double(double)>& func, double x1, double x2, dou
 		fb = func(b);
 	}
 	cout<<"[WARN] Maximum number of iterations exceeded in zbrent"<<endl;
-	return 0.0;
+	return "0.0";
 }
 
 // just returns the overall minima of the potential
@@ -209,19 +277,6 @@ void Numerov::wait_for_key()
     return;
 }
 
-/*void Numerov::plotXY(std::vector<double> x, std::vector<double> y){
-    try {
-        Gnuplot g1("lines");
-
-        g1.set_grid();
-        g1.set_style("points").plot_xy(x,y,"user-defined points 2d");
-
-        wait_for_key();
-   	} catch (GnuplotException &ge) {
-        cout << ge.what() << endl;
-    }
-}*/
-
 void Numerov::setPotential(vector<Point> v = vector<Point>(1)){
 	// the potential can be read at this point from a file or similar, or can be hard coded.
     if(v.size() > 1) {
@@ -242,7 +297,7 @@ void Numerov::setPotential(vector<Point> v = vector<Point>(1)){
 
 	// here we use the nice feature of c++ 11, the lambda functions
 	// oh dear, this is soo cool!
-	potFunc = [this] (double x){ 
+	potFunc = [this] (mpreal x){ 
 		// here we have to interpolate the potential since all the testing points are not in the grid!
 		// a linear interpolation is used
 		// first get the closest left point
@@ -256,15 +311,27 @@ void Numerov::setPotential(vector<Point> v = vector<Point>(1)){
 			index = potential.size() - 2;
 		}
 
-		double x0 = potential[index].x;
-		double x1 = potential[index + 1].x;
-		double y0 = potential[index].y;
-		double y1 = potential[index + 1].y;
+		mpreal x0 = potential[index].x;
+		mpreal x1 = potential[index + 1].x;
+		mpreal y0 = potential[index].y;
+		mpreal y1 = potential[index + 1].y;
 
-		double m = (y1 - y0) / (x1 - x0);
+		mpreal m = (y1 - y0) / (x1 - x0);
 		return y0 + m * (x - x0);
 	};
     
+}
+
+// just a wrapper for using double as type
+void Numerov::setPotential2(vector<Point2> v){
+    vector<Point> vWrap;
+    vWrap.resize(v.size());
+    for(int i = 0; v.size(); i++){
+        vWrap[i].x = v[i].x;
+        vWrap[i].y = v[i].y;
+    }
+    
+    setPotential(vWrap);
 }
 
 void Numerov::displaySol(vector<Point> sol){
@@ -273,36 +340,36 @@ void Numerov::displaySol(vector<Point> sol){
 	}
 }
 
-double Numerov::diff(double E){
+mpreal Numerov::diff(mpreal E){
 
 	// first we find the matching point
-	function<double(double)> shiftedPot = [this, &E](double x) {
+	function<mpreal(mpreal)> shiftedPot = [this, &E](mpreal x) {
 		//cout<<"E=" << E << " shiftedPot(" << x <<")=" << E - potFunc(x) << endl;
 		return E - potFunc(x);
 	};
 	
 	// since we want to find preferently the right turning point we
 	// look from the minimum position to the right
-	double matchPoint = zbrent(shiftedPot, minPot.x, xMax, tol);
+	mpreal matchPoint = zbrent(shiftedPot, minPot.x, xMax, tol);
 	int matchPointIndex = int((matchPoint - xMin) / h);
 	// now we have to propagate left and right solutions until the matching point
 	solLR.clear();
     solLR.resize(matchPointIndex + 1);
     solLR[0].x = xMin;
-    solLR[0].y = 0;
+    solLR[0].y = "0";
     solLR[1].x = xMin + h;
-    solLR[1].y = 0.0001;  // this number should not be important, but it has to be small to avoid overflow
+    solLR[1].y = "0.0001";  // this number should not be important, but it has to be small to avoid overflow
 
 	//cout << "matchPointIndex = " << matchPointIndex << " solLR.size() = " << solLR.size() << endl;
-	double h2 = h * h;
+	mpreal h2 = h * h / "12";
     for(int i = 2; i < solLR.size(); i++)
     {
-        double x2  = xMin + (i - 2) * h; 
-        double x1  = xMin + (i - 1) * h;
-        double x   = xMin + i * h;     
-        double p1  = 2 - 0.83333333333333 * h2 * shiftedPot(x1);
-        double p2  = 1 + 0.08333333333333 * h2 * shiftedPot(x2);
-        double p3  = 1 + 0.08333333333333 * h2 * shiftedPot(x);
+        mpreal x2  = xMin + (i - 2) * h; 
+        mpreal x1  = xMin + (i - 1) * h;
+        mpreal x   = xMin + i * h;     
+        mpreal p1  = "2" - "10"  * h2 * shiftedPot(x1);
+        mpreal p2  = "1" +  h2 * shiftedPot(x2);
+        mpreal p3  = "1" +  h2 * shiftedPot(x);
         solLR[i].y = (p1 * solLR[i-1].y - p2 * solLR[i-2].y) / p3;
         solLR[i].x = x;
     }
@@ -311,24 +378,24 @@ double Numerov::diff(double E){
 	solRL.resize(potential.size() - solLR.size());
     //fill the array, propagating the solRLution from the Right to the Left
     solRL[solRL.size() - 1].x = xMax;
-    solRL[solRL.size() - 1].y = 0;
+    solRL[solRL.size() - 1].y = "0";
     solRL[solRL.size() - 2].x = xMax - h;
-    solRL[solRL.size() - 2].y = 0.0001;
+    solRL[solRL.size() - 2].y = "0.0001";
 
     for(int i = solRL.size() - 3; i > -1; i--)
     {
-        double x2  = matchPoint + (i + 2) * h;   
-        double x1  = matchPoint + (i + 1) * h;  
-        double x   = matchPoint + i * h;       
-        double p1  = 2 - 0.83333333333333 * h2 * shiftedPot(x1);
-        double p2  = 1 + 0.08333333333333 * h2 * shiftedPot(x2);
-        double p3  = 1 + 0.08333333333333 * h2 * shiftedPot(x);
+        mpreal x2  = matchPoint + (i + 2) * h;   
+        mpreal x1  = matchPoint + (i + 1) * h;  
+        mpreal x   = matchPoint + i * h;       
+        mpreal p1  = "2" - "10" * h2 * shiftedPot(x1);
+        mpreal p2  = "1" + h2 * shiftedPot(x2);
+        mpreal p3  = "1" + h2 * shiftedPot(x);
         solRL[i].y = (p1 * solRL[i+1].y - p2*solRL[i+2].y) / p3;
         solRL[i].x = x;
     }
 
 	// now we have to find the log derivative at the matching point
-	double logDer = ((25/12)*solLR[matchPointIndex].y-4*solLR[matchPointIndex-1].y+3*solLR[matchPointIndex-2].y-(4/3)* solLR[matchPointIndex-3].y+(1/4)* solLR[matchPointIndex-4].y)*solRL[0].y+solLR[matchPointIndex].y*((25/12)*solRL[0].y-4*solRL[1].y+3*solRL[2].y-(4/3)*solRL[3].y+(1/4) * solRL[4].y);
+	mpreal logDer = ((25/12)*solLR[matchPointIndex].y-4*solLR[matchPointIndex-1].y+3*solLR[matchPointIndex-2].y-(4/3)* solLR[matchPointIndex-3].y+(1/4)* solLR[matchPointIndex-4].y)*solRL[0].y+solLR[matchPointIndex].y*((25/12)*solRL[0].y-4*solRL[1].y+3*solRL[2].y-(4/3)*solRL[3].y+(1/4) * solRL[4].y);
 	
 	return logDer;
 }
@@ -343,9 +410,9 @@ double Numerov::diff(double E){
  */
 void Numerov::scanForZeroRanges(int nZeros) {
 	findMinPot();
-	double E = minPot.y;
+	mpreal E = minPot.y;
 	zeros.clear();
-	double lastDiff = diff(E), newDiff;
+	mpreal lastDiff = diff(E), newDiff;
 	while(zeros.size() < nZeros){
 		newDiff = diff(E);
 		if(newDiff * lastDiff < 0){
@@ -362,7 +429,7 @@ void Numerov::scanForZeroRanges(int nZeros) {
 
 void Numerov::buildSol() {
 	sol.clear();
-	double scale = solRL[0].y / solLR[solLR.size() - 1].y;
+	mpreal scale = solRL[0].y / solLR[solLR.size() - 1].y;
 	for (int i = 0; i < solLR.size(); i++) {
 		Point p;
 		p.x = solLR[i].x;
@@ -374,7 +441,7 @@ void Numerov::buildSol() {
 	}
 
 	// finally we have to normalize it
-	double c = 0;
+	mpreal c = 0;
 	for (int i = 0; i < sol.size(); i++) 
 		c += sol[i].y * sol[i].y;
 	
@@ -393,7 +460,7 @@ void Numerov::findSpectrum(int nEigen){
 	scanForZeroRanges(nEigen);
 	for (int i = 0; i < nEigen; i++) {
 		Range range = zeros[i];
-		double E = zbrent(diffFunc, range.eMin, range.eMax, tol);
+		mpreal E = zbrent(diffFunc, range.eMin, range.eMax, tol);
 		buildSol();
 		Mode mode(E, sol);
 		spectrum.addMode(mode);
@@ -403,14 +470,14 @@ void Numerov::findSpectrum(int nEigen){
 
 void Numerov::savePotential() {
     ofstream f("potential.dat");
-	for (double x = xMin; x < xMax; x += 0.01) {
+	for (mpreal x = xMin; x < xMax; x += 0.01) {
 		f << x << " " << potFunc(x) << endl;
 	}
 	f.close();
 }
 
-double Numerov::bisection(function<double(double)> diffFunc, double min, double max){
-	double E;
+mpreal Numerov::bisection(function<mpreal(mpreal)> diffFunc, mpreal min, mpreal max){
+	mpreal E;
 	int i=0;			     /* counter for iterations */
 	do{
 		i++;  

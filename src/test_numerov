@@ -1,0 +1,11 @@
+#include "numerov.hpp"
+
+int main() {
+	Numerov n;
+	n.h = 0.005;
+	n.setPotential();
+	n.findSpectrum(11);
+	n.dumpEnergies();
+	n.dumpEnergies2();
+	return 0;
+}

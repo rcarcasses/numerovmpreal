@@ -1,1 +1,3 @@
-PKG_CXXFLAGS = -std=c++11
+PKG_CXXFLAGS = -std=c++11 -Wno-sign-compare
+PKG_LIBS= -lmpfr -lgmp
+CFLAGS=-c -Wall

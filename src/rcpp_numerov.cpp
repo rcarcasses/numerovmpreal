@@ -23,18 +23,18 @@ void setPotential(NumericVector px = NumericVector(), NumericVector py = Numeric
         return;
     }
     // translate the potential and feed it to numerov
-	vector<Point> potential(px.size());
+	vector<Point2> potential(px.size());
     for(int i = 0; i < px.size(); i++) {
         potential[i].x = px(i);
         potential[i].y = py(i);
     }
     
-    n.setPotential(potential);
+    n.setPotential2(potential);
 }
 
 // [[Rcpp::export]]
 List getPotential() {
-    vector<Point> p = n.getPotential();
+    vector<Point2> p = n.getPotential2();
     int length = p.size();
     NumericVector x;
     NumericVector y;
@@ -47,15 +47,15 @@ List getPotential() {
 }
 
 // [[Rcpp::export]]
-void computeSpectrum(int nEigen, double dE = 0.1, double tol = 1e-9) {
-    n.dEmin = dE;
-    n.tol = tol;
+void computeSpectrum(int nEigen){//, double dE = 0.1, double tol = 1e-9) {
+    //n.dEmin = dE;
+    //n.tol = tol;
     n.findSpectrum(nEigen);
 }
 
 // [[Rcpp::export]]
 NumericVector getEnergies() {
-    vector<double> energies = n.getSpectrum().getEnergies();
+    vector<double> energies = n.getSpectrum().getEnergies2();
     NumericVector x(energies.begin(), energies.end());
 
     return x;
@@ -64,7 +64,7 @@ NumericVector getEnergies() {
 // [[Rcpp::export]]
 List getWavefunctions() {
     List wfs;
-    vector<vector<Point>> WFs = n.getSpectrum().getWavefunctions();
+    vector<vector<Point2>> WFs = n.getSpectrum().getWavefunctions2();
     
     for(int i = 0; i < WFs.size(); i++) {
         int length = WFs[i].size();

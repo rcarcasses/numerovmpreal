@@ -37,14 +37,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // computeSpectrum
-void computeSpectrum(int nEigen, double dE, double tol);
-RcppExport SEXP numerov_computeSpectrum(SEXP nEigenSEXP, SEXP dESEXP, SEXP tolSEXP) {
+void computeSpectrum(int nEigen);
+RcppExport SEXP numerov_computeSpectrum(SEXP nEigenSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< int >::type nEigen(nEigenSEXP);
-    Rcpp::traits::input_parameter< double >::type dE(dESEXP);
-    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    computeSpectrum(nEigen, dE, tol);
+    computeSpectrum(nEigen);
     return R_NilValue;
 END_RCPP
 }

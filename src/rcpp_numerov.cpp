@@ -47,9 +47,9 @@ List getPotential() {
 }
 
 // [[Rcpp::export]]
-void computeSpectrum(int nEigen){//, double dE = 0.1, double tol = 1e-9) {
-    //n.dEmin = dE;
-    //n.tol = tol;
+void computeSpectrum(int nEigen, double dE = 0.1, double tol = 1e-9) {
+    n.set_dEmin(dE);
+    n.set_tol(tol);
     n.findSpectrum(nEigen);
 }
 

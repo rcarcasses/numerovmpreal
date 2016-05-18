@@ -9,6 +9,10 @@
 #include <functional>
 #include "mpreal.h"
 
+#define DEBUG true
+#define DEBUG_STDERR(x) (std::cerr << "[ERROR][numerov] " << (x) << endl)
+#define DEBUG_STDOUT(x) (std::cout << "[DEBUG][numerov] " << (x) << endl)
+
 using namespace std;
 using mpfr::mpreal;
 
@@ -105,6 +109,7 @@ struct Spectrum {
     
 };
 
+
 class Numerov {
 	private:
 		vector<Point> potential;
@@ -138,6 +143,9 @@ class Numerov {
 		mpreal tol   = "1e-9";
 		mpreal dEmin = "0.1";
 		int nPoints  = 2000;
+        void set_h(double dh);
+        void set_tol(double dtol);
+        void set_dEmin(double ddEmin);
 
 		void setPotential(vector<Point>);
 		void setPotential2(vector<Point2>);
@@ -149,6 +157,18 @@ class Numerov {
 		Spectrum getSpectrum();
 
 };
+
+void Numerov::set_h(double dh) {
+    h = mpreal(h);
+}
+
+void Numerov::set_tol(double dtol) {
+    tol = mpreal(tol);
+}
+
+void Numerov::set_dEmin(double ddEmin) {
+    dEmin = mpreal(dEmin);
+}
 
 void Numerov::dumpEnergies (){
 	cout << "ENERGIES:" << endl;
@@ -252,6 +272,9 @@ mpreal Numerov::zbrent(function<mpreal(mpreal)>& func, mpreal x1, mpreal x2, mpr
 
 // just returns the overall minima of the potential
 void Numerov::findMinPot(){
+    #ifdef DEBUG
+        DEBUG_STDOUT("Finding the minimum of the potential");
+    #endif
 	minPot = potential[0];
 
 	for (int i = 0; i < potential.size(); i++) 
@@ -278,6 +301,9 @@ void Numerov::wait_for_key()
 }
 
 void Numerov::setPotential(vector<Point> v = vector<Point>(1)){
+    #ifdef DEBUG
+        DEBUG_STDOUT("Setting potential");
+    #endif
 	// the potential can be read at this point from a file or similar, or can be hard coded.
     if(v.size() > 1) {
         potential = v;
@@ -326,9 +352,9 @@ void Numerov::setPotential(vector<Point> v = vector<Point>(1)){
 void Numerov::setPotential2(vector<Point2> v){
     vector<Point> vWrap;
     vWrap.resize(v.size());
-    for(int i = 0; v.size(); i++){
-        vWrap[i].x = v[i].x;
-        vWrap[i].y = v[i].y;
+    for(int i = 0; i < v.size(); i++){
+        vWrap[i].x = mpreal(v[i].x);
+        vWrap[i].y = mpreal(v[i].y);
     }
     
     setPotential(vWrap);
@@ -409,6 +435,10 @@ mpreal Numerov::diff(mpreal E){
  * These ranges are later used to find the root in a more refined phase.
  */
 void Numerov::scanForZeroRanges(int nZeros) {
+    #ifdef DEBUG
+        DEBUG_STDOUT("Scanning for zeros");
+    #endif
+    
 	findMinPot();
 	mpreal E = minPot.y;
 	zeros.clear();
@@ -428,6 +458,9 @@ void Numerov::scanForZeroRanges(int nZeros) {
 }
 
 void Numerov::buildSol() {
+    #ifdef DEBUG
+        DEBUG_STDOUT("Building solution");
+    #endif
 	sol.clear();
 	mpreal scale = solRL[0].y / solLR[solLR.size() - 1].y;
 	for (int i = 0; i < solLR.size(); i++) {
@@ -450,6 +483,10 @@ void Numerov::buildSol() {
 }
 
 void Numerov::findSpectrum(int nEigen){
+    #ifdef DEBUG
+        DEBUG_STDOUT("Finding spectrum");
+    #endif
+    
     if(potential.size() < 2) {
         cout << "Please use the setPotential() function before using this one." << endl;
         return;

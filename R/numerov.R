@@ -15,7 +15,7 @@ quantumAnalysis <- function(px = seq(-5, 5, by = 0.01),
         setPotential(px, py);
     }
     
-    computeSpectrum(nEigen); #, dE, tol);
+    computeSpectrum(nEigen, dE, tol);
     wfs      = getWavefunctions();
     energies = getEnergies();
     potential = getPotential();

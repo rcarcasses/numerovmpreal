@@ -13,8 +13,8 @@ getPotential <- function() {
     .Call('numerov_getPotential', PACKAGE = 'numerov')
 }
 
-computeSpectrum <- function(nEigen) {
-    invisible(.Call('numerov_computeSpectrum', PACKAGE = 'numerov', nEigen))
+computeSpectrum <- function(nEigen, dE = 0.1, tol = 1e-9) {
+    invisible(.Call('numerov_computeSpectrum', PACKAGE = 'numerov', nEigen, dE, tol))
 }
 
 getEnergies <- function() {

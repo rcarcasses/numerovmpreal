@@ -8,7 +8,8 @@ quantumAnalysis <- function(px = seq(-5, 5, by = 0.01),
                             nEigen = 6,
                             scale = 60,
                             dE = 0.1, 
-                            tol = 1e-9) {
+                            shift = TRUE,
+                            tol = 1e-9, ...) {
     if(length(px) != length(py)) {
         setPotential();
     } else {
@@ -20,11 +21,16 @@ quantumAnalysis <- function(px = seq(-5, 5, by = 0.01),
     energies = getEnergies();
     potential = getPotential();
     # make a nice quantum graph
+    options = list(...)
     plot.new();
-    plot(potential$x, potential$y, xlab = 'x', ylab = 'V(x)', type = 'l', lwd = 3);
+    do.call(plot, append(list(potential$x, potential$y, xlab = 'x', ylab = 'V(x)', type = 'l', lwd = 3), options));
     
     cl <- rainbow(length(wfs));
     for(i in 1:length(wfs)) {
-        lines(wfs[[i]]$x, scale * wfs[[i]]$y + energies[i], col = cl[i], lwd = 2);
+        Eshift = 0;
+        if(shift)
+            Eshift = energies[i];
+        
+        lines(wfs[[i]]$x, scale * wfs[[i]]$y + Eshift, col = cl[i], lwd = 2);
     }
 }

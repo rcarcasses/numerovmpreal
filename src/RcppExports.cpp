@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // rcpp_numerov
 List rcpp_numerov();
-RcppExport SEXP numerov_rcpp_numerov() {
+RcppExport SEXP numerovmpreal_rcpp_numerov() {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -17,7 +17,7 @@ END_RCPP
 }
 // setPotential
 void setPotential(NumericVector px, NumericVector py);
-RcppExport SEXP numerov_setPotential(SEXP pxSEXP, SEXP pySEXP) {
+RcppExport SEXP numerovmpreal_setPotential(SEXP pxSEXP, SEXP pySEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< NumericVector >::type px(pxSEXP);
@@ -26,9 +26,29 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// setLeftTail
+void setLeftTail(NumericVector leftTail);
+RcppExport SEXP numerovmpreal_setLeftTail(SEXP leftTailSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type leftTail(leftTailSEXP);
+    setLeftTail(leftTail);
+    return R_NilValue;
+END_RCPP
+}
+// setRightTail
+void setRightTail(NumericVector rightTail);
+RcppExport SEXP numerovmpreal_setRightTail(SEXP rightTailSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type rightTail(rightTailSEXP);
+    setRightTail(rightTail);
+    return R_NilValue;
+END_RCPP
+}
 // getPotential
 List getPotential();
-RcppExport SEXP numerov_getPotential() {
+RcppExport SEXP numerovmpreal_getPotential() {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -38,7 +58,7 @@ END_RCPP
 }
 // computeSpectrum
 void computeSpectrum(int nEigen, double dE, double tol);
-RcppExport SEXP numerov_computeSpectrum(SEXP nEigenSEXP, SEXP dESEXP, SEXP tolSEXP) {
+RcppExport SEXP numerovmpreal_computeSpectrum(SEXP nEigenSEXP, SEXP dESEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< int >::type nEigen(nEigenSEXP);
@@ -50,7 +70,7 @@ END_RCPP
 }
 // getEnergies
 NumericVector getEnergies();
-RcppExport SEXP numerov_getEnergies() {
+RcppExport SEXP numerovmpreal_getEnergies() {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -60,7 +80,7 @@ END_RCPP
 }
 // getWavefunctions
 List getWavefunctions();
-RcppExport SEXP numerov_getWavefunctions() {
+RcppExport SEXP numerovmpreal_getWavefunctions() {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;

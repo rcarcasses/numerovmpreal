@@ -33,6 +33,24 @@ void setPotential(NumericVector px = NumericVector(), NumericVector py = Numeric
 }
 
 // [[Rcpp::export]]
+void setLeftTail(NumericVector leftTail) {
+	vector<double> l(leftTail.size());
+	for (int i = 0; i < leftTail.size(); i++) 
+		l[i] = leftTail(i);
+		
+	n.setLeftTail(l);
+}
+
+// [[Rcpp::export]]
+void setRightTail(NumericVector rightTail) {
+	vector<double> r(rightTail.size());
+	for (int i = 0; i < rightTail.size(); i++) 
+		r[i] = rightTail(i);
+		
+	n.setRightTail(r);
+}
+
+// [[Rcpp::export]]
 List getPotential() {
     vector<Point2> p = n.getPotential2();
     int length = p.size();

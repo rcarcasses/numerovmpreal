@@ -1,24 +1,24 @@
-\name{numerov-package}
-\alias{numerov-package}
-\alias{numerov}
+\name{numerovmpreal-package}
+\alias{numerovmpreal-package}
+\alias{numerovmpreal}
 \docType{package}
 \title{
-\packageTitle{numerov}
+\packageTitle{numerovmpreal}
 }
 \description{
-\packageDescription{numerov}
+\packageDescription{numerovmpreal}
 }
 \details{
 
 The DESCRIPTION file:
-\packageDESCRIPTION{numerov}
-\packageIndices{numerov}
+\packageDESCRIPTION{numerovmpreal}
+\packageIndices{numerovmpreal}
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-\packageAuthor{numerov}
+\packageAuthor{numerovmpreal}
 
-Maintainer: \packageMaintainer{numerov}
+Maintainer: \packageMaintainer{numerovmpreal}
 }
 \references{
 ~~ Literature or other references for background information ~~

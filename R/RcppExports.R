@@ -2,26 +2,34 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 rcpp_numerov <- function() {
-    .Call('numerov_rcpp_numerov', PACKAGE = 'numerov')
+    .Call('numerovmpreal_rcpp_numerov', PACKAGE = 'numerovmpreal')
 }
 
 setPotential <- function(px = numeric(), py = numeric()) {
-    invisible(.Call('numerov_setPotential', PACKAGE = 'numerov', px, py))
+    invisible(.Call('numerovmpreal_setPotential', PACKAGE = 'numerovmpreal', px, py))
+}
+
+setLeftTail <- function(leftTail) {
+    invisible(.Call('numerovmpreal_setLeftTail', PACKAGE = 'numerovmpreal', leftTail))
+}
+
+setRightTail <- function(rightTail) {
+    invisible(.Call('numerovmpreal_setRightTail', PACKAGE = 'numerovmpreal', rightTail))
 }
 
 getPotential <- function() {
-    .Call('numerov_getPotential', PACKAGE = 'numerov')
+    .Call('numerovmpreal_getPotential', PACKAGE = 'numerovmpreal')
 }
 
 computeSpectrum <- function(nEigen, dE = 0.1, tol = 1e-9) {
-    invisible(.Call('numerov_computeSpectrum', PACKAGE = 'numerov', nEigen, dE, tol))
+    invisible(.Call('numerovmpreal_computeSpectrum', PACKAGE = 'numerovmpreal', nEigen, dE, tol))
 }
 
 getEnergies <- function() {
-    .Call('numerov_getEnergies', PACKAGE = 'numerov')
+    .Call('numerovmpreal_getEnergies', PACKAGE = 'numerovmpreal')
 }
 
 getWavefunctions <- function() {
-    .Call('numerov_getWavefunctions', PACKAGE = 'numerov')
+    .Call('numerovmpreal_getWavefunctions', PACKAGE = 'numerovmpreal')
 }
 

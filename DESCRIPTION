@@ -1,11 +1,11 @@
-Package: numerov
+Package: numerovmpreal
 Type: Package
-Title: Numerov
+Title: Numerov mpreal
 Version: 1.1.2
 Date: 2016-04-07
 Author: Robert Carcassés Quevedo
 Maintainer: Robert Carcassés Quevedo <carcasses@gmail.com>
-Description: Solves a one dimensional Schrodinger problem using the Numerov algorithm.
+Description: Solves a one dimensional Schrodinger problem using the Numerov algorithm. This version uses high precision computation library mpreal.
 License: GPL (>= 2)
 Imports: Rcpp (>= 0.12.4)
 LinkingTo: Rcpp

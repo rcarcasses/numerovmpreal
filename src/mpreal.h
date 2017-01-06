@@ -140,7 +140,6 @@
   #define MPREAL_PERMISSIVE_EXPR
 #endif
 
-// [[Rcpp::export]]
 namespace mpfr {
 
 class mpreal {

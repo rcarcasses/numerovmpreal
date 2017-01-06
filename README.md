@@ -1,0 +1,1 @@
+Numerovmpreal solves a one dimensional Schrodinger problem *with arbitrary precision*. Unless really needed, you may find more helpful to use the non-mpreal version of this code at (https://github.com/rcarcasses/numerov)[https://github.com/rcarcasses/numerov]. You can also find there additional information about the workflow.
